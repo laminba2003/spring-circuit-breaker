@@ -1,7 +1,5 @@
 package com.spring.training.config;
 
-import com.spring.training.client.CountryClient;
-import com.spring.training.client.PersonClient;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import io.github.resilience4j.timelimiter.TimeLimiterConfig;
 import io.netty.handler.timeout.ReadTimeoutHandler;
@@ -46,16 +44,6 @@ public class ApplicationConfig {
     @LoadBalanced
     public WebClient.Builder webClientBuilder() {
         return WebClient.builder();
-    }
-
-    @Bean
-    public PersonClient personClient(WebClient client, ReactiveResilience4JCircuitBreakerFactory factory) {
-        return new PersonClient(client, factory);
-    }
-
-    @Bean
-    public CountryClient countryClient(WebClient client, ReactiveResilience4JCircuitBreakerFactory factory) {
-        return new CountryClient(client, factory);
     }
 
     @Bean

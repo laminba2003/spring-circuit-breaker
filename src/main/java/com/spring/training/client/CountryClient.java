@@ -6,11 +6,13 @@ import lombok.AllArgsConstructor;
 import org.springframework.cloud.circuitbreaker.resilience4j.ReactiveResilience4JCircuitBreakerFactory;
 import org.springframework.cloud.client.circuitbreaker.ReactiveCircuitBreaker;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @AllArgsConstructor
+@Component
 public class CountryClient {
 
     final WebClient client;
@@ -21,14 +23,16 @@ public class CountryClient {
         return circuitBreaker.run(client.get().uri("/countries")
                         .retrieve()
                         .bodyToFlux(Country.class),
-                throwable -> Flux.just(new Country()));
+                throwable -> FallbackClient.getCountries());
     }
 
     public Mono<Country> getCountry(String name) {
-        return client.get().uri("/countries/{name}", name)
-                .retrieve()
-                .onStatus(HttpStatus::is4xxClientError, response -> Mono.error(new EntityNotFoundException("country not found with name : " + name)))
-                .bodyToMono(Country.class);
+        ReactiveCircuitBreaker circuitBreaker = circuitBreakerFactory.create("getCountry");
+        return circuitBreaker.run(client.get().uri("/countries/{name}", name)
+                        .retrieve()
+                        .onStatus(HttpStatus::is4xxClientError, response -> Mono.error(new EntityNotFoundException("country not found with name : " + name)))
+                        .bodyToMono(Country.class),
+                throwable -> FallbackClient.getCountry());
     }
 
     public Mono<Country> createCountry(Country country) {
