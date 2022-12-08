@@ -14,7 +14,7 @@ The Spring Cloud Netflix project is really just an annotation-based wrapper libr
 
 The Spring Cloud Circuit Breaker project solves this. It provides an abstraction layer across different circuit breaker implementations. It's a pluggable architecture. So, we can code against the provided abstraction/interface and switch to another implementation based on our needs.
 
-For this project, we'll focus only on the Resilience4J implementation.
+For this project, we'll focus only on the **Resilience4J** implementation.
 
 ## Setup
 
@@ -23,7 +23,6 @@ There are two starters for the Resilience4J implementations, one for reactive ap
 - org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j - non-reactive applications
 
 - org.springframework.cloud:spring-cloud-starter-circuitbreaker-reactor-resilience4j - reactive applications
-
 
 ```xml
 <dependency>
@@ -46,21 +45,21 @@ There are two starters for the Resilience4J implementations, one for reactive ap
 
 ## Configuration
 
-To provide a default configuration for all of your circuit breakers create a Customize bean that is passed a Resilience4JCircuitBreakerFactory or ReactiveResilience4JCircuitBreakerFactory. The configureDefault method can be used to provide a default configuration.
+To provide a default configuration for all of your circuit breakers, you need to create a Customizer bean that is passed a Resilience4JCircuitBreakerFactory or ReactiveResilience4JCircuitBreakerFactory. The configureDefault method can be used to provide a default configuration.
 
 ```java
 @Bean
-    public Customizer<ReactiveResilience4JCircuitBreakerFactory> defaultCustomizer() {
-        return factory -> factory.configureDefault(id -> new Resilience4JConfigBuilder(id)
-                .circuitBreakerConfig(CircuitBreakerConfig.ofDefaults())
-                .timeLimiterConfig(TimeLimiterConfig.custom().timeoutDuration(Duration.ofSeconds(5)).build()).build());
-    }
+public Customizer<ReactiveResilience4JCircuitBreakerFactory> defaultCustomizer() {
+    return factory -> factory.configureDefault(id -> new Resilience4JConfigBuilder(id)
+            .circuitBreakerConfig(CircuitBreakerConfig.ofDefaults())
+            .timeLimiterConfig(TimeLimiterConfig.custom().timeoutDuration(Duration.ofSeconds(5)).build()).build());
+}
 ```
 
 ## Sending Request
 
-The ReactiveCircuitBreakerFactory.create API will create an instance of a class called ReactiveCircuitBreaker. The run method takes with a Mono or Flux and wraps it in a circuit breaker. 
-You can optionally profile a fallback Function which will be called if the circuit breaker is tripped and will be passed the Throwable that caused the failure.
+The ReactiveCircuitBreakerFactory.create method will create an instance of a class called ReactiveCircuitBreaker. The run method takes with a Mono or Flux and wraps it in a circuit breaker. 
+You can optionally profile a fallback function which will be called if the circuit breaker is tripped and will be passed the Throwable that caused the failure.
 
 ```java
 ReactiveCircuitBreaker circuitBreaker = circuitBreakerFactory.create("getCountries");
